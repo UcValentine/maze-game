@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Maze Game</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+
+  <style>
+    body{
+      background-color: #282c34;
+      max-width: 500px;
+      margin: auto;
+      overflow: hidden;
+    }
+    #info p,h1{
+      display: flex;
+      color: beige;
+    }
+    .count{
+      margin-bottom: 10px;
+    }
+    #display{
+      color: aquamarine;
+      font-size: 200%;
+    }
+    @media screen and (max-width: 992px) {
+      #canvas {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <div id="info">
+      <h1>Welcome To Maze Game!</h1>
+      <p>Instructions: <br> You have 60 seconds to complete the game. On your keyboad, use "←" to move left, "→" to move right, "↑" to move up, "↓" to move down</p>
+      <div class="count">
+        <button id="start">Start Now</button>
+        <span id="display"></span>
+      </div>
+    </div>
+    <div>
+      <canvas id="canvas" width="500" height="500"></canvas>
+    </div>
+    <p>Created by Valentine Onah</p>
+  </div>
+
+  <script>
+    //countDown
+    var timer;
+    function countDown(i, callback) {
+    timer = setInterval(function() {
+        document.getElementById("display").innerHTML =+ i;
+        i-- || (clearInterval(timer), callback());
+      }, 1000);
+    }
+    $("#start").on("click", function(){
+    countDown(60, function(){
+        alert("Time Over!")
+       });
+    });
+
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+
+    //i got this idea from https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/scale
+    const worldMap = [
+      [1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+      [1,0,1,0,0,0,0,0,1,0,0,0,1,0,0,0,1],
+      [1,0,1,1,1,1,1,0,1,0,1,1,1,0,1,0,1],
+      [1,0,0,0,0,0,0,0,1,0,0,0,1,0,1,0,1],
+      [1,0,1,1,1,0,1,0,1,1,1,0,1,0,1,0,1],
+      [1,0,1,0,0,0,1,0,0,0,0,0,0,0,1,0,1],
+      [1,0,1,1,1,1,1,1,1,1,1,0,1,1,1,0,1],
+      [1,0,1,0,0,0,1,0,0,0,0,0,1,0,0,0,1],
+      [1,0,1,0,1,1,1,1,1,0,1,1,1,0,1,1,1],
+      [1,0,0,0,1,0,0,0,1,0,1,0,0,0,1,0,1],
+      [1,1,1,0,1,0,1,0,1,1,1,0,1,1,1,0,1],
+      [1,0,0,0,1,0,1,0,0,0,0,0,1,0,0,0,1],
+      [1,1,1,1,1,0,1,0,1,1,1,1,1,0,1,0,1],
+      [1,0,0,0,0,0,1,0,0,0,1,0,0,0,1,0,1],
+      [1,0,1,0,1,0,1,1,1,1,1,0,1,0,1,0,1],
+      [1,0,1,1,1,1,1,0,1,0,1,1,1,0,1,0,1],
+      [1,0,0,0,1,0,0,0,0,0,1,0,0,0,1,0,1],
+      [1,0,1,1,1,0,1,1,1,0,1,0,1,1,1,0,1],
+      [1,0,0,0,0,0,0,0,1,0,0,0,1,0,0,0,1],
+      [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1]
+    ]
+
+    const cols = 20;
+    const size = parseInt(canvas.width / cols);
+
+    const world = [];
+
+    worldMap.forEach((row, rowIndex) => {
+      row.forEach((col, colIndex) => {
+        world.push({
+          type: col === 1 ? 'BLOCK' : 'FLOOR',
+          x: colIndex * size,
+          y: rowIndex * size,
+          width: size,
+          height: size
+        })
+      })
+    });
+
+    const floors = world.filter(elm => elm.type === 'FLOOOR');
+    const blocks = world.filter(elm => elm.type === 'BLOCK');
+
+    const player = {
+      x: size,
+      y: 0,
+      width: size,
+      height: size,
+      fill: 'white',
+      moveUp: function() {
+        const self = this
+        let hit = false
+      
+        blocks.forEach(elm => {
+          if (self.y - size === elm.y && self.x === elm.x) {
+            hit = true
+          }
+        })
+        
+        if (!hit) this.y -= size
+      },
+      moveDown: function() {
+        const self = this
+        let hit = false
+      
+        blocks.forEach(elm => {
+          if (self.y + size === elm.y && self.x === elm.x) {
+            hit = true
+          }
+        })
+        
+        if (!hit) this.y += size
+        
+        if (self.y >= cols * size) {
+          alert('congrats! you made it to the end')
+          window.XMLHttpRequestUpload;    
+        }
+      },
+      moveLeft: function() {
+        const self = this
+        let hit = false
+      
+        blocks.forEach(elm => {
+          if (self.x - size === elm.x && self.y === elm.y) {
+            hit = true
+          }
+        })
+        
+        if (!hit) this.x -= size
+      },
+      moveRight: function() {
+        const self = this
+        let hit = false
+      
+        blocks.forEach(elm => {
+          if (self.x + size === elm.x && self.y === elm.y) {
+            hit = true
+          }
+        })
+        
+        if (!hit) this.x += size
+      }
+    }
+
+    const renderGame = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height)
+      
+      blocks.forEach(elm => {
+        ctx.fillRect(elm.x, elm.y, elm.width, elm.height)
+      })
+      
+      floors.forEach(elm => {
+        ctx.rect(elm.x, elm.y, elm.width, elm.height)
+      });
+      
+      ctx.save()
+      ctx.fillStyle = player.fill
+      ctx.fillRect(player.x, player.y, player.width, player.height)
+      ctx.restore()
+    }
+
+    renderGame();
+
+    window.onkeydown = function(e) {
+      const key = e.keyCode
+
+      switch(key) {
+        case 38: player.moveUp(); break
+        case 40: player.moveDown(); break
+        case 37: player.moveLeft(); break
+        case 39: player.moveRight(); break
+      }
+      
+      renderGame();
+    }
+  </script>
+</body>
+</html>
